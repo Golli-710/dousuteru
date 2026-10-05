@@ -82,12 +82,16 @@ for (const [heading, pages] of headings) check(pages.length === 1, `Duplicate H1
 const sitemap = await readFile(resolve(out,'sitemap.xml'),'utf8');
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => match[1]);
 const expectedUrls = [canonical('/'), ...municipalities.map(city => canonical(`/${city.slug}/`)), ...verified.map(row => { const city=municipalities.find(m=>m.name===row.municipality), item=items.find(i=>i.name===row.item); return canonical(`/${city.slug}/${encodeURIComponent(item?.slug || row.item)}/`); })].sort();
+check(sitemap.startsWith('<?xml version="1.0" encoding="UTF-8"?>') && sitemap.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">') && sitemap.endsWith('</urlset>'), 'Sitemap XML document structure is invalid.');
+check(sitemapUrls.length === (sitemap.match(/<url>/g)||[]).length, 'Some sitemap entries are missing a single <loc> URL.');
 check(sitemapUrls.length === 62, `Expected 62 sitemap URLs; found ${sitemapUrls.length}.`);
 check(new Set(sitemapUrls).size === sitemapUrls.length, 'Duplicate sitemap URLs found.');
 check(JSON.stringify([...sitemapUrls].sort()) === JSON.stringify(expectedUrls), 'Sitemap URLs do not match home, municipality, and verified pages.');
+check(sitemapUrls.every(url => url.startsWith(`${site.base_url.replace(/\/$/, '')}${basePath}/`)), 'Sitemap contains a URL outside the configured HTTPS base path.');
 check(!sitemap.includes('/yokohama/rice-cooker/') && !sitemap.includes('/yokohama/child-seat/'), 'Draft item appears in sitemap.');
 const robots = await readFile(resolve(out,'robots.txt'),'utf8');
 check(robots.includes(`Sitemap: ${canonical('/sitemap.xml')}`), 'robots.txt sitemap URL is incorrect.');
+check(/User-agent: \*\nAllow: \/\n/.test(robots) && !/^Disallow:\s*\/$/mi.test(robots), 'robots.txt must allow crawling and not block the whole site.');
 const app = await readFile(resolve(out,'app.js'),'utf8');
 let submit;
 const result = { innerHTML: '' };

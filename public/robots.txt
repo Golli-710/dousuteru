@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://Golli-710.github.io/dousuteru/sitemap.xml
+Sitemap: https://golli-710.github.io/dousuteru/sitemap.xml
