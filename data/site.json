@@ -1,7 +1,7 @@
 {
   "site_name": "どう捨てる？",
   "subtitle": "自治体別のゴミ・不用品の捨て方検索",
-  "base_url": "https://example.com",
+  "base_url": "https://Golli-710.github.io",
   "base_path": "/dousuteru",
-  "base_url_note": "公開前にGitHub Pagesのオリジンへ変更してください。project siteではbase_pathを/dousuteruにします。独自ドメイン等でルート公開する場合は空文字にします。"
+  "base_url_note": "GitHub Pages project site: https://Golli-710.github.io/dousuteru/"
 }
