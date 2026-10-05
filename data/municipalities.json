@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "kawasaki",
+    "name": "川崎市",
+    "prefecture": "神奈川県",
+    "official_url": "https://www.city.kawasaki.jp/kurashi/category/261-1-10-11-0-0-0-0-0-0.html",
+    "source_name": "川崎市 粗大ごみ",
+    "basic_rule": "家庭から出る粗大ごみは、最長辺30cm以上の金属製品、または最長辺50cm以上の家具類などが対象です。"
+  },
+  {
+    "slug": "yokohama",
+    "name": "横浜市",
+    "prefecture": "神奈川県",
+    "official_url": "https://www.city.yokohama.lg.jp/kurashi/sumai-kurashi/gomi-recycle/gomi/shushu/sodaigomi/dashikata/sodaigomi.html",
+    "source_name": "横浜市 粗大ごみの申込み",
+    "basic_rule": "一番長い辺が金属製品で30cm以上、金属以外（プラスチック製品・木製品など）で50cm以上のものが粗大ごみです。"
+  },
+  {
+    "slug": "osaka",
+    "name": "大阪市",
+    "prefecture": "大阪府",
+    "official_url": "https://www.city.osaka.lg.jp/kankyo/page/0000369355.html",
+    "source_name": "大阪市 粗大ごみの収集について",
+    "basic_rule": "家庭から出るごみで最大の辺・径が30cmを超えるもの、または棒状で1mを超えるものが粗大ごみの対象です。品目一覧で区分をご確認ください。"
+  }
+]

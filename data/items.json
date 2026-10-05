@@ -1,0 +1,218 @@
+[
+  {
+    "name": "ベッド",
+    "category": "家具",
+    "slug": "bed"
+  },
+  {
+    "name": "マットレス",
+    "category": "家具",
+    "slug": "mattress"
+  },
+  {
+    "name": "ソファ",
+    "category": "家具",
+    "slug": "sofa"
+  },
+  {
+    "name": "タンス",
+    "category": "家具",
+    "slug": "dresser"
+  },
+  {
+    "name": "食器棚",
+    "category": "家具"
+  },
+  {
+    "name": "本棚",
+    "category": "家具",
+    "slug": "bookshelf"
+  },
+  {
+    "name": "テーブル",
+    "category": "家具",
+    "slug": "table"
+  },
+  {
+    "name": "机",
+    "category": "家具",
+    "slug": "desk"
+  },
+  {
+    "name": "椅子",
+    "category": "家具",
+    "slug": "chair"
+  },
+  {
+    "name": "テレビ台",
+    "category": "家具"
+  },
+  {
+    "name": "電子レンジ",
+    "category": "家電",
+    "slug": "microwave"
+  },
+  {
+    "name": "炊飯器",
+    "category": "家電",
+    "slug": "rice-cooker"
+  },
+  {
+    "name": "掃除機",
+    "category": "家電",
+    "slug": "vacuum-cleaner"
+  },
+  {
+    "name": "扇風機",
+    "category": "家電",
+    "slug": "electric-fan"
+  },
+  {
+    "name": "空気清浄機",
+    "category": "家電"
+  },
+  {
+    "name": "ストーブ",
+    "category": "家電"
+  },
+  {
+    "name": "ファンヒーター",
+    "category": "家電"
+  },
+  {
+    "name": "電気カーペット",
+    "category": "家電"
+  },
+  {
+    "name": "オーブントースター",
+    "category": "家電"
+  },
+  {
+    "name": "ホットプレート",
+    "category": "家電"
+  },
+  {
+    "name": "自転車",
+    "category": "生活用品",
+    "slug": "bicycle"
+  },
+  {
+    "name": "布団",
+    "category": "生活用品",
+    "slug": "futon"
+  },
+  {
+    "name": "カーペット",
+    "category": "生活用品",
+    "slug": "carpet"
+  },
+  {
+    "name": "スーツケース",
+    "category": "生活用品",
+    "slug": "suitcase"
+  },
+  {
+    "name": "衣装ケース",
+    "category": "生活用品",
+    "slug": "storage-case"
+  },
+  {
+    "name": "物干し竿",
+    "category": "生活用品"
+  },
+  {
+    "name": "脚立",
+    "category": "生活用品"
+  },
+  {
+    "name": "ベビーカー",
+    "category": "生活用品",
+    "slug": "stroller"
+  },
+  {
+    "name": "チャイルドシート",
+    "category": "生活用品",
+    "slug": "child-seat"
+  },
+  {
+    "name": "ゴルフクラブ",
+    "category": "生活用品",
+    "slug": "golf-clubs"
+  },
+  {
+    "name": "スキー板",
+    "category": "趣味・スポーツ"
+  },
+  {
+    "name": "スノーボード",
+    "category": "趣味・スポーツ"
+  },
+  {
+    "name": "サーフボード",
+    "category": "趣味・スポーツ"
+  },
+  {
+    "name": "ランニングマシン",
+    "category": "趣味・スポーツ"
+  },
+  {
+    "name": "エアロバイク",
+    "category": "趣味・スポーツ"
+  },
+  {
+    "name": "キーボード",
+    "category": "趣味・スポーツ"
+  },
+  {
+    "name": "ギター",
+    "category": "趣味・スポーツ"
+  },
+  {
+    "name": "スピーカー",
+    "category": "趣味・スポーツ"
+  },
+  {
+    "name": "水槽",
+    "category": "趣味・スポーツ"
+  },
+  {
+    "name": "キャリーケース",
+    "category": "趣味・スポーツ"
+  },
+  {
+    "name": "ふとん乾燥機",
+    "category": "その他"
+  },
+  {
+    "name": "ミシン",
+    "category": "その他"
+  },
+  {
+    "name": "加湿器",
+    "category": "その他"
+  },
+  {
+    "name": "除湿機",
+    "category": "その他"
+  },
+  {
+    "name": "衣類乾燥機",
+    "category": "その他"
+  },
+  {
+    "name": "金属ラック",
+    "category": "その他"
+  },
+  {
+    "name": "傘立て",
+    "category": "その他"
+  },
+  {
+    "name": "ベンチ",
+    "category": "その他"
+  },
+  {
+    "name": "ローテーブル",
+    "category": "その他"
+  }
+]

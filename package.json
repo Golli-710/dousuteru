@@ -1,0 +1,10 @@
+{
+  "name": "dousuteru",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node src/generators/build.mjs",
+    "audit": "node src/generators/audit.mjs",
+    "check": "npm run build && npm run audit"
+  }
+}
