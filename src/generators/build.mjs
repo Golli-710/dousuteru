@@ -31,9 +31,10 @@ function breadcrumbSchema(crumbs) {
 function breadcrumbHtml(crumbs) {
   return `<nav class="breadcrumbs" aria-label="パンくず"><ol>${crumbs.map((crumb, index) => `<li>${index === crumbs.length - 1 ? `<span aria-current="page">${esc(crumb.name)}</span>` : crumb.path ? `<a href="${localUrl(crumb.path)}">${esc(crumb.name)}</a>` : `<span>${esc(crumb.name)}</span>`}</li>`).join('')}</ol></nav>`;
 }
-function shell({ title, description, body, path = '/', crumbs = [], noindex = false }) {
+function shell({ title, description, body, path = '/', crumbs = [], noindex = false, googleSiteVerification = false }) {
   const schemas = [websiteSchema(), ...(crumbs.length ? [breadcrumbSchema(crumbs)] : [])];
-  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}">${noindex ? '<meta name="robots" content="noindex,follow">' : `<link rel="canonical" href="${esc(canonicalUrl(path))}">`}<link rel="stylesheet" href="${localUrl('/styles.css')}"><script type="application/ld+json">${safeJson(schemas)}</script></head><body>${nav}<main>${body}</main>${footer}<script type="module" src="${localUrl('/app.js')}"></script></body></html>`;
+  const verificationTag = googleSiteVerification ? '<meta name="google-site-verification" content="1Mh9dLEDh98zsyMK-1fJe1bOT_gdS-vFDKZf-wMKRWU">' : '';
+  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}">${verificationTag}${noindex ? '<meta name="robots" content="noindex,follow">' : `<link rel="canonical" href="${esc(canonicalUrl(path))}">`}<link rel="stylesheet" href="${localUrl('/styles.css')}"><script type="application/ld+json">${safeJson(schemas)}</script></head><body>${nav}<main>${body}</main>${footer}<script type="module" src="${localUrl('/app.js')}"></script></body></html>`;
 }
 const countFor = municipality => verified.filter(row => row.municipality === municipality).length;
 const cityOptions = municipalities.map(m => `<option value="${esc(m.slug)}">${esc(m.name)}</option>`).join('');
@@ -44,7 +45,7 @@ function searchForm(id = 'search-form') {
 }
 const homeCrumbs = [{ name: site.site_name, path: '/' }];
 const home = `<section class="hero"><p class="eyebrow">自治体 × 品目で探す</p><h1>何を捨てたい？</h1><p>自治体別のゴミ・不用品の捨て方を、公式情報から探せます。</p></section>${ad('ページ上部')}<section aria-labelledby="search-title"><h2 id="search-title">品目と自治体を選んで検索</h2>${searchForm()}</section><section id="results" aria-live="polite"><h2>自治体から探す</h2><div class="city-grid">${municipalities.map(m => `<a class="city-card" href="${localUrl(`/${m.slug}/`)}"><strong>${esc(m.name)}</strong><span>${esc(m.prefecture)}・確認済み${countFor(m.name)}品目</span></a>`).join('')}</div><p class="notice">確認済み情報のみ検索結果に表示します。未確認品目は公式情報を確認中です。</p></section>${ad('ページ下部')}`;
-await writeFile(resolve(out, 'index.html'), shell({ title: 'どう捨てる？｜自治体別のゴミ・不用品の捨て方検索', description: '捨てたい品目と自治体から、処分方法・料金・申込方法を検索。自治体公式情報を確認できる品目のみ掲載しています。', body: home, crumbs: homeCrumbs }));
+await writeFile(resolve(out, 'index.html'), shell({ title: 'どう捨てる？｜自治体別のゴミ・不用品の捨て方検索', description: '捨てたい品目と自治体から、処分方法・料金・申込方法を検索。自治体公式情報を確認できる品目のみ掲載しています。', body: home, crumbs: homeCrumbs, googleSiteVerification: true }));
 
 for (const municipality of municipalities) {
   const cityRows = verified.filter(row => row.municipality === municipality.name);
