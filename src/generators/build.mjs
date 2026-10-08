@@ -35,7 +35,8 @@ function breadcrumbHtml(crumbs) {
 function shell({ title, description, body, path = '/', crumbs = [], noindex = false, googleSiteVerification = false }) {
   noindex ||= site.noindex;
   const schemas = [websiteSchema(), ...(crumbs.length ? [breadcrumbSchema(crumbs)] : [])];
-  const verificationTag = googleSiteVerification ? '<meta name="google-site-verification" content="1Mh9dLEDh98zsyMK-1fJe1bOT_gdS-vFDKZf-wMKRWU">' : '';
+  const verificationCode = process.env.GOOGLE_SITE_VERIFICATION || '1Mh9dLEDh98zsyMK-1fJe1bOT_gdS-vFDKZf-wMKRWU';
+  const verificationTag = googleSiteVerification ? `<meta name="google-site-verification" content="${esc(verificationCode)}">` : '';
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}">${verificationTag}<meta property="og:type" content="website"><meta property="og:locale" content="ja_JP"><meta property="og:site_name" content="${esc(site.site_name)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonicalUrl(path))}"><meta name="twitter:card" content="summary">${noindex ? '<meta name="robots" content="noindex,follow">' : `<link rel="canonical" href="${esc(canonicalUrl(path))}">`}<link rel="stylesheet" href="${localUrl('/styles.css')}"><script type="application/ld+json">${safeJson(schemas)}</script></head><body>${nav}<main>${body}</main>${footer}<script type="module" src="${localUrl('/app.js')}"></script></body></html>`;
 }
 const countFor = municipality => verified.filter(row => row.municipality === municipality).length;

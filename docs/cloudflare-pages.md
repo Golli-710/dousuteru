@@ -44,3 +44,6 @@
 - https://developers.cloudflare.com/pages/configuration/headers/
 - https://developers.cloudflare.com/pages/configuration/redirects/
 - https://developers.cloudflare.com/pages/platform/limits/
+# Search Console ownership
+
+Set `GOOGLE_SITE_VERIFICATION` in the Cloudflare Production build environment to the HTML-tag value provided by the Google account adding the URL-prefix property. The homepage emits it in its head; when unset, the existing GitHub Pages verification value is retained. Keep the variable after verification so Google can recheck ownership. This does not enable indexing.
