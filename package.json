@@ -5,6 +5,7 @@
   "scripts": {
     "build": "node src/generators/build.mjs",
     "audit": "node src/generators/audit.mjs",
-    "check": "npm run build && npm run audit"
+    "check": "npm run build && npm run audit",
+    "build:cloudflare": "node src/generators/cloudflare.mjs"
   }
 }

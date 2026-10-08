@@ -1,3 +1,4 @@
+import { loadSite } from './site-config.mjs';
 import { readFile, mkdir, writeFile, rm } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -5,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = async path => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const [municipalities, items, site, disposal] = await Promise.all([
-  read('data/municipalities.json'), read('data/items.json'), read('data/site.json'), read('data/disposal.json'),
+  read('data/municipalities.json'), read('data/items.json'), loadSite(root), read('data/disposal.json'),
 ]);
 const basePath = (site.base_path || '').replace(/\/$/, '');
 const out = resolve(root, 'public');
@@ -32,9 +33,10 @@ function breadcrumbHtml(crumbs) {
   return `<nav class="breadcrumbs" aria-label="パンくず"><ol>${crumbs.map((crumb, index) => `<li>${index === crumbs.length - 1 ? `<span aria-current="page">${esc(crumb.name)}</span>` : crumb.path ? `<a href="${localUrl(crumb.path)}">${esc(crumb.name)}</a>` : `<span>${esc(crumb.name)}</span>`}</li>`).join('')}</ol></nav>`;
 }
 function shell({ title, description, body, path = '/', crumbs = [], noindex = false, googleSiteVerification = false }) {
+  noindex ||= site.noindex;
   const schemas = [websiteSchema(), ...(crumbs.length ? [breadcrumbSchema(crumbs)] : [])];
   const verificationTag = googleSiteVerification ? '<meta name="google-site-verification" content="1Mh9dLEDh98zsyMK-1fJe1bOT_gdS-vFDKZf-wMKRWU">' : '';
-  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}">${verificationTag}${noindex ? '<meta name="robots" content="noindex,follow">' : `<link rel="canonical" href="${esc(canonicalUrl(path))}">`}<link rel="stylesheet" href="${localUrl('/styles.css')}"><script type="application/ld+json">${safeJson(schemas)}</script></head><body>${nav}<main>${body}</main>${footer}<script type="module" src="${localUrl('/app.js')}"></script></body></html>`;
+  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}">${verificationTag}<meta property="og:type" content="website"><meta property="og:locale" content="ja_JP"><meta property="og:site_name" content="${esc(site.site_name)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonicalUrl(path))}"><meta name="twitter:card" content="summary">${noindex ? '<meta name="robots" content="noindex,follow">' : `<link rel="canonical" href="${esc(canonicalUrl(path))}">`}<link rel="stylesheet" href="${localUrl('/styles.css')}"><script type="application/ld+json">${safeJson(schemas)}</script></head><body>${nav}<main>${body}</main>${footer}<script type="module" src="${localUrl('/app.js')}"></script></body></html>`;
 }
 const countFor = municipality => verified.filter(row => row.municipality === municipality).length;
 const cityOptions = municipalities.map(m => `<option value="${esc(m.slug)}">${esc(m.name)}</option>`).join('');
@@ -102,4 +104,11 @@ const sitemapRows = routePaths.map(path => `<url><loc>${esc(canonicalUrl(path))}
 await writeFile(resolve(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemapRows}</urlset>`);
 await writeFile(resolve(out, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${canonicalUrl('/sitemap.xml')}\n`);
 await writeFile(resolve(out, '.nojekyll'), '');
+if (site.cloudflare) {
+  await writeFile(resolve(out, '_headers'), site.noindex ? '/*\n  X-Robots-Tag: noindex, follow\n' : '');
+  // Compatibility for visitors who copied the former GitHub Pages path.
+  // This only redirects requests on the NEW host, never the old github.io host.
+  await writeFile(resolve(out, '_redirects'), basePath === '' ? '/dousuteru / 301\n/dousuteru/ / 301\n/dousuteru/* /:splat 301\n' : '');
+}
+
 console.log(`Generated ${routePaths.length} indexed routes, ${verified.length} verified item pages, 1 not-found page.`);
