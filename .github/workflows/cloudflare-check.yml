@@ -21,3 +21,5 @@ jobs:
         env:
           SITE_ORIGIN: https://migration-test.invalid
           SITE_INDEXING: ${{ matrix.indexing }}
+      - name: Verify analytics consent and data minimization
+        run: node --test scripts/analytics.test.mjs
