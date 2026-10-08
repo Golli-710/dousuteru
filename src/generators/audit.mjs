@@ -1,3 +1,4 @@
+import { loadSite } from './site-config.mjs';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -6,7 +7,7 @@ import vm from 'node:vm';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async path => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const [municipalities, items, site, disposal] = await Promise.all([
-  readJson('data/municipalities.json'), readJson('data/items.json'), readJson('data/site.json'), readJson('data/disposal.json'),
+  readJson('data/municipalities.json'), readJson('data/items.json'), loadSite(root), readJson('data/disposal.json'),
 ]);
 const out = resolve(root, 'public');
 const errors = [];
@@ -64,8 +65,9 @@ for (const file of htmlFiles) {
   check(h1s.length === 1, `Expected one H1 in ${rel}; found ${h1s.length}.`);
   if (h1s[0]) headings.set(h1s[0], [...(headings.get(h1s[0])||[]), rel]);
   check(Boolean(description?.[1]), `Missing description: ${rel}`);
-  if (is404) check(html.includes('noindex,follow'), '404 should be noindex.');
+  if (is404 || site.noindex) check(html.includes('noindex,follow'), '404 should be noindex.');
   else check(html.includes(`<link rel="canonical" href="${canonical(rel === '/index.html' ? '/' : rel.replace(/\/index\.html$/, '/'))}">`), `Canonical missing or mismatched: ${rel}`);
+  check(html.includes('<meta property="og:url" content="' + canonical(rel === '/index.html' || is404 ? '/' : rel.replace(/\/index\.html$/, '/')) + '">'), `OGP URL mismatch: ${rel}`);
   check(html.includes('application/ld+json') && html.includes('WebSite'), `WebSite JSON-LD missing: ${rel}`);
   if (!is404) check(html.includes('BreadcrumbList'), `Breadcrumb JSON-LD missing: ${rel}`);
   const internalAttrs = [...html.matchAll(/\b(?:href|src)="([^"]+)"/g)].map(match => match[1]).filter(value => value.startsWith('/'));
@@ -92,6 +94,12 @@ check(!sitemap.includes('/yokohama/rice-cooker/') && !sitemap.includes('/yokoham
 const robots = await readFile(resolve(out,'robots.txt'),'utf8');
 check(robots.includes(`Sitemap: ${canonical('/sitemap.xml')}`), 'robots.txt sitemap URL is incorrect.');
 check(/User-agent: \*\nAllow: \/\n/.test(robots) && !/^Disallow:\s*\/$/mi.test(robots), 'robots.txt must allow crawling and not block the whole site.');
+if (site.cloudflare) {
+  const headers = await readFile(resolve(out, '_headers'), 'utf8');
+  check(!site.noindex || headers.includes('X-Robots-Tag: noindex, follow'), 'Staging HTTP noindex header missing.');
+  const redirects = await readFile(resolve(out, '_redirects'), 'utf8');
+  check(basePath !== '' || redirects.includes('/dousuteru/* /:splat 301'), 'Legacy-path compatibility redirect missing.');
+}
 const app = await readFile(resolve(out,'app.js'),'utf8');
 let submit;
 const result = { innerHTML: '' };

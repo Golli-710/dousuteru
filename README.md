@@ -28,7 +28,7 @@ node src/generators/build.mjs
 node src/generators/audit.mjs
 ```
 
-`public/`をローカルのWebサーバーで見る場合は、`data/site.json`の`base_path`を一時的に空文字にしてからビルドします。GitHub Pages向けに戻すときは`/dousuteru`に戻して再生成してください。
+`public/`をルートでローカル表示する場合は、`SITE_BASE_PATH= node src/generators/build.mjs`で生成します。設定ファイルの変更は不要です。
 
 便利なnpmスクリプトもあります。
 
@@ -105,3 +105,7 @@ git push -u origin main
 ## 将来のデータ更新
 
 自動取得を追加するときは、公式情報の取得、候補抽出、正規化、旧データとの比較、レビュー、承認の順で実装します。自動抽出結果をそのまま`verified`として公開しません。
+
+## Cloudflare Pages移行
+
+[移行手順](docs/cloudflare-pages.md)を参照してください。GitHub Pagesの公開設定と既存workflowは維持しています。

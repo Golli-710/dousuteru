@@ -1,0 +1,23 @@
+name: Verify Cloudflare Pages build
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        indexing: [staging, production]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build and audit root-hosted Cloudflare output
+        run: npm run build:cloudflare
+        env:
+          SITE_ORIGIN: https://migration-test.invalid
+          SITE_INDEXING: ${{ matrix.indexing }}
