@@ -46,7 +46,7 @@ async function walk(dir) {
 }
 await walk(out);
 const htmlFiles = allFiles.filter(file => extname(file) === '.html');
-check(htmlFiles.length === verified.length + municipalities.length + 2, `Expected ${verified.length} detail + ${municipalities.length} municipality + home + 404 HTML files; found ${htmlFiles.length}.`);
+check(htmlFiles.length === verified.length + municipalities.length + 5, `Expected ${verified.length} detail + ${municipalities.length} municipality + home + 404 HTML files; found ${htmlFiles.length}.`);
 check(allFiles.some(file => file === resolve(out, '404.html')), '404.html is missing.');
 check(allFiles.some(file => file === resolve(out, 'robots.txt')), 'robots.txt is missing.');
 check(allFiles.some(file => file === resolve(out, '.nojekyll')), '.nojekyll is missing.');
@@ -83,10 +83,10 @@ for (const [title, pages] of titles) check(pages.length === 1, `Duplicate title 
 for (const [heading, pages] of headings) check(pages.length === 1, `Duplicate H1 '${heading}': ${pages.join(', ')}`);
 const sitemap = await readFile(resolve(out,'sitemap.xml'),'utf8');
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => match[1]);
-const expectedUrls = [canonical('/'), ...municipalities.map(city => canonical(`/${city.slug}/`)), ...verified.map(row => { const city=municipalities.find(m=>m.name===row.municipality), item=items.find(i=>i.name===row.item); return canonical(`/${city.slug}/${encodeURIComponent(item?.slug || row.item)}/`); })].sort();
+const expectedUrls = [canonical('/'), ...['about','advertising','privacy'].map(p => canonical(`/${p}/`)), ...municipalities.map(city => canonical(`/${city.slug}/`)), ...verified.map(row => { const city=municipalities.find(m=>m.name===row.municipality), item=items.find(i=>i.name===row.item); return canonical(`/${city.slug}/${encodeURIComponent(item?.slug || row.item)}/`); })].sort();
 check(sitemap.startsWith('<?xml version="1.0" encoding="UTF-8"?>') && sitemap.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">') && sitemap.endsWith('</urlset>'), 'Sitemap XML document structure is invalid.');
 check(sitemapUrls.length === (sitemap.match(/<url>/g)||[]).length, 'Some sitemap entries are missing a single <loc> URL.');
-check(sitemapUrls.length === 62, `Expected 62 sitemap URLs; found ${sitemapUrls.length}.`);
+check(sitemapUrls.length === 65, `Expected 65 sitemap URLs; found ${sitemapUrls.length}.`);
 check(new Set(sitemapUrls).size === sitemapUrls.length, 'Duplicate sitemap URLs found.');
 check(JSON.stringify([...sitemapUrls].sort()) === JSON.stringify(expectedUrls), 'Sitemap URLs do not match home, municipality, and verified pages.');
 check(sitemapUrls.every(url => url.startsWith(`${site.base_url.replace(/\/$/, '')}${basePath}/`)), 'Sitemap contains a URL outside the configured HTTPS base path.');
@@ -105,7 +105,7 @@ let submit;
 const result = { innerHTML: '' };
 const values = {'item-query':'電子レンジ','municipality-query':'','prefecture-query':'','category-query':''};
 const form = { parentElement:{querySelector:selector=>selector==='#results'?result:null}, querySelector:selector=>({value:values[selector.slice(1)]??''}), addEventListener:(name,callback)=>{if(name==='submit')submit=callback;} };
-vm.runInNewContext(app,{document:{querySelectorAll:()=>[form]}});
+vm.runInNewContext(app,{window:{},document:{querySelectorAll:()=>[form]}});
 submit({preventDefault(){}});
 check((result.innerHTML.match(/class="result"/g)||[]).length===3,'Search should return one verified microwave result per city.');
 values['item-query']='チャイルドシート'; values['municipality-query']='yokohama'; submit({preventDefault(){}});
@@ -118,5 +118,5 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log(`Audit passed: ${verified.length} verified / ${disposal.length-verified.length} draft records, ${municipalities.length} municipality pages, ${verified.length} details, home, 404, 62 sitemap URLs, SEO metadata, JSON-LD, internal links, search, and responsive CSS.`);
+  console.log(`Audit passed: ${verified.length} verified / ${disposal.length-verified.length} draft records, ${municipalities.length} municipality pages, ${verified.length} details, home, 404, 65 sitemap URLs, SEO metadata, JSON-LD, internal links, search, and responsive CSS.`);
 }

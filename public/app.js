@@ -6,5 +6,6 @@ for(const form of document.querySelectorAll('.search-panel'))form.addEventListen
   const q=value('item-query').trim(),city=value('municipality-query'),pref=value('prefecture-query'),category=value('category-query');
   const results=form.parentElement.querySelector('#results')||document.querySelector('#results');
   const found=DB.disposal.filter(row=>(!q||row.item.includes(q))&&(!city||DB.municipalities.find(m=>m.name===row.municipality)?.slug===city)&&(!pref||row.prefecture===pref)&&(!category||row.category===category));
+  window.SiteMetrics?.track('search_submit', {result_count: found.length, has_query: Boolean(q)});
   results.innerHTML='<h2>検索結果</h2>'+(found.length?found.map(row=>{const m=DB.municipalities.find(city=>city.name===row.municipality),item=DB.items.find(i=>i.name===row.item),slug=item?.slug||encodeURIComponent(row.item);return '<article class="result"><h3><a href="'+localUrl('/'+m.slug+'/'+slug+'/')+'">'+m.name+'｜'+row.item+'</a></h3><p>'+row.disposal_method+'</p><p>料金：'+row.fee+'</p><a href="'+row.official_url+'">自治体公式情報</a></article>'}).join(''):'<p class="notice">条件に一致する確認済み情報はありません。現在、公式情報を確認中です。</p>')+'<aside class="ad-slot">広告 <small>検索結果途中</small></aside>';
 });
