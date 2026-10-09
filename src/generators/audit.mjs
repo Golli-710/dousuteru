@@ -116,10 +116,21 @@ const app = await readFile(resolve(out,'app.js'),'utf8');
 let submit;
 const result = { innerHTML: '' };
 const values = {'item-query':'電子レンジ','municipality-query':'','prefecture-query':'','category-query':''};
-const form = { parentElement:{querySelector:selector=>selector==='#results'?result:null}, querySelector:selector=>({value:values[selector.slice(1)]??''}), addEventListener:(name,callback)=>{if(name==='submit')submit=callback;} };
+const events = {};
+const fields = Object.fromEntries([...Object.keys(values), 'item-select'].map(id => [id, {
+  get value() { return values[id] || ''; }, set value(value) { values[id] = value; },
+  addEventListener(name, callback) { events[`${id}:${name}`] = callback; },
+}]));
+const form = { parentElement:{querySelector:selector=>selector==='#results'?result:null}, querySelector:selector=>fields[selector.slice(1)], addEventListener:(name,callback)=>{if(name==='submit')submit=callback;} };
 vm.runInNewContext(app,{window:{},document:{querySelectorAll:()=>[form]}});
 submit({preventDefault(){}});
 check((result.innerHTML.match(/class="result"/g)||[]).length===3,'Search should return one verified microwave result per city.');
+values['item-select'] = 'ソファ'; events['item-select:change'](); submit({preventDefault(){}});
+check(values['item-query'] === 'ソファ' && (result.innerHTML.match(/class="result"/g)||[]).length === 3, 'Picker selection should fill the input and search the selected item.');
+values['item-query'] = '電子'; events['item-query:input'](); submit({preventDefault(){}});
+check(values['item-select'] === '' && result.innerHTML.includes('電子レンジ'), 'Editing the selected item should clear the picker and allow partial text search.');
+values['item-query'] = '電子レンジ'; events['item-query:input']();
+check(values['item-select'] === '電子レンジ', 'Exact text should synchronize the picker.');
 values['item-query']='チャイルドシート'; values['municipality-query']='yokohama'; submit({preventDefault(){}});
 check(result.innerHTML.includes('公式情報を確認中'),'Draft-only Yokohama item should not appear in search results.');
 const css = await readFile(resolve(out,'styles.css'),'utf8');
