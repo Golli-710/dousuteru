@@ -37,7 +37,7 @@ function breadcrumbHtml(crumbs) {
 }
 function shell({ title, description, body, path = '/', crumbs = [], noindex = false, googleSiteVerification = false }) {
   noindex ||= site.noindex;
-  const schemas = [websiteSchema(), ...(crumbs.length ? [breadcrumbSchema(crumbs)] : [])];
+  const schemas = [websiteSchema(), ...(crumbs.length > 1 ? [breadcrumbSchema(crumbs)] : [])];
   const verificationCode = process.env.GOOGLE_SITE_VERIFICATION || '1Mh9dLEDh98zsyMK-1fJe1bOT_gdS-vFDKZf-wMKRWU';
   const verificationTag = googleSiteVerification ? `<meta name="google-site-verification" content="${esc(verificationCode)}">` : '';
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="site-analytics" content="${esc(analyticsId)}"><meta name="analytics-site" content="どう捨てる？"><title>${esc(title)}</title><meta name="description" content="${esc(description)}">${verificationTag}<meta property="og:type" content="website"><meta property="og:locale" content="ja_JP"><meta property="og:site_name" content="${esc(site.site_name)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${esc(canonicalUrl(path))}"><meta name="twitter:card" content="summary">${noindex ? '<meta name="robots" content="noindex,follow">' : `<link rel="canonical" href="${esc(canonicalUrl(path))}">`}<link rel="stylesheet" href="${localUrl('/styles.css')}"><script type="application/ld+json">${safeJson(schemas)}</script></head><body>${nav}<main>${body}</main>${footer}<script type="module" src="${localUrl('/app.js')}"></script><script defer src="${localUrl('/analytics.js')}"></script></body></html>`;
@@ -55,14 +55,15 @@ await writeFile(resolve(out, 'index.html'), shell({ title: 'どう捨てる？�
 
 
 for (const policy of policies) {
-  const body = `<h1>${esc(policy.title)}</h1>${policy.sections.map(([heading, text]) => `<section><h2>${esc(heading)}</h2><p>${esc(text)}</p></section>`).join('')}${policy.slug === 'privacy' ? `<p>現在のアクセス解析：${analyticsId ? '同意した場合のみGoogle Analyticsで計測します。' : '外部のアクセス解析は無効です。'}</p><p><a href="https://policies.google.com/privacy">Googleのプライバシーポリシー</a></p>` : ''}<p>更新日：2026年10月8日</p>`;
-  await put(`${policy.slug}/index.html`, shell({title: `${policy.title}｜どう捨てる？`, description: policy.description, body, path: `/${policy.slug}/`, crumbs: [...homeCrumbs, {name: policy.title, path: `/${policy.slug}/`}]}));
+  const policyCrumbs = [...homeCrumbs, {name: policy.title, path: `/${policy.slug}/`}];
+  const body = `${breadcrumbHtml(policyCrumbs)}<h1>${esc(policy.title)}</h1>${policy.sections.map(([heading, text]) => `<section><h2>${esc(heading)}</h2><p>${esc(text)}</p></section>`).join('')}${policy.slug === 'privacy' ? `<p>現在のアクセス解析：${analyticsId ? '同意した場合のみGoogle Analyticsで計測します。' : '外部のアクセス解析は無効です。'}</p><p><a href="https://policies.google.com/privacy">Googleのプライバシーポリシー</a></p>` : ''}<p>更新日：2026年10月8日</p>`;
+  await put(`${policy.slug}/index.html`, shell({title: `${policy.title}｜どう捨てる？`, description: policy.description, body, path: `/${policy.slug}/`, crumbs: policyCrumbs}));
 }
 await writeFile(resolve(out, 'analytics.js'), await readFile(resolve(root, 'src/analytics.js'), 'utf8'));
 
 for (const municipality of municipalities) {
   const cityRows = verified.filter(row => row.municipality === municipality.name);
-  const cityCrumbs = [...homeCrumbs, { name: municipality.prefecture }, { name: municipality.name, path: `/${municipality.slug}/` }];
+  const cityCrumbs = [...homeCrumbs, { name: municipality.name, path: `/${municipality.slug}/` }];
   const itemsHtml = cityRows.length ? `<div class="item-grid">${cityRows.map(row => `<a href="${localUrl(`/${municipality.slug}/${pathPart(row.item)}/`)}">${esc(row.item)}<span>${esc(row.fee)}</span></a>`).join('')}</div>` : `<p class="notice">品目ごとの処分方法は現在確認中です。</p>`;
   const body = `${breadcrumbHtml(cityCrumbs)}<h1>${esc(municipality.name)}のゴミ・不用品の捨て方</h1><p>${esc(municipality.prefecture)}の品目別処分情報を、自治体公式資料から整理しています。</p>${ad('ページ上部')}<section class="rule-card"><h2>粗大ごみの基本ルール</h2><p>${esc(municipality.basic_rule || '対象条件や申込方法は自治体公式案内をご確認ください。')}</p></section><h2>掲載品目（確認済み${cityRows.length}件）</h2>${itemsHtml}<section aria-labelledby="city-search-title"><h2 id="city-search-title">品目を検索</h2>${searchForm('search-form-city')}<div id="results" aria-live="polite"><p>品目名から確認済み情報を検索できます。</p></div></section><h2>自治体公式情報</h2><p><a href="${esc(municipality.official_url)}" rel="noopener">${esc(municipality.source_name)}（${esc(municipality.name)}公式サイト）</a></p>${ad('ページ下部')}`;
   await put(`${municipality.slug}/index.html`, shell({ title: `${municipality.name}のゴミ・不用品の捨て方｜どう捨てる？`, description: `${municipality.name}で不用品を処分する方法を品目別に検索。確認済み${cityRows.length}品目の料金・申込方法などを自治体公式情報から掲載しています。`, body, path: `/${municipality.slug}/`, crumbs: cityCrumbs }));
@@ -73,7 +74,7 @@ for (const row of verified) {
   if (!municipality) continue;
   const detailPath = `/${municipality.slug}/${pathPart(row.item)}/`;
   const similar = verified.filter(other => other.municipality === row.municipality && other.item !== row.item && other.category === row.category).slice(0, 5);
-  const detailCrumbs = [...homeCrumbs, { name: municipality.prefecture }, { name: municipality.name, path: `/${municipality.slug}/` }, { name: row.item, path: detailPath }];
+  const detailCrumbs = [...homeCrumbs, { name: municipality.name, path: `/${municipality.slug}/` }, { name: row.item, path: detailPath }];
   const sources = (row.source_urls?.length ? row.source_urls : [row.official_url]).map((url, index) => `<li><a href="${esc(url)}" rel="noopener">${index === 0 ? esc(row.source_name) : `${esc(municipality.name)}公式の関連案内`}</a></li>`).join('');
   const category = row.disposal_category || row.disposal_method;
   const summary = `<section class="answer-card" aria-label="処分方法の要点"><p class="answer-lead">${esc(row.item)}は${esc(municipality.name)}で${esc(category)}として処分できます。</p><dl class="summary-grid"><div><dt>処分区分</dt><dd>${esc(category)}</dd></div><div><dt>料金</dt><dd>${esc(row.fee)}</dd></div><div><dt>申込</dt><dd>${esc(row.application_required)}</dd></div></dl></section>`;
