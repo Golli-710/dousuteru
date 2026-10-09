@@ -69,7 +69,19 @@ for (const file of htmlFiles) {
   else check(html.includes(`<link rel="canonical" href="${canonical(rel === '/index.html' ? '/' : rel.replace(/\/index\.html$/, '/'))}">`), `Canonical missing or mismatched: ${rel}`);
   check(html.includes('<meta property="og:url" content="' + canonical(rel === '/index.html' || is404 ? '/' : rel.replace(/\/index\.html$/, '/')) + '">'), `OGP URL mismatch: ${rel}`);
   check(html.includes('application/ld+json') && html.includes('WebSite'), `WebSite JSON-LD missing: ${rel}`);
-  if (!is404) check(html.includes('BreadcrumbList'), `Breadcrumb JSON-LD missing: ${rel}`);
+  if (!is404 && rel !== '/index.html') check(html.includes('BreadcrumbList'), `Breadcrumb JSON-LD missing: ${rel}`);
+  if (!is404 && rel !== '/index.html') {
+    const schemas = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)[1]);
+    const crumbs = schemas.find(schema => schema['@type'] === 'BreadcrumbList')?.itemListElement || [];
+    const visible = html.match(/<nav class="breadcrumbs"[^>]*>(.*?)<\/nav>/s)?.[1] || '';
+    const entries = [...visible.matchAll(/<li>(.*?)<\/li>/gs)].map(match => match[1]);
+    check(crumbs.length >= 2 && entries.length === crumbs.length, `Visible/schema breadcrumb count mismatch: ${rel}`);
+    crumbs.forEach((crumb, i) => {
+      check(crumb.position === i + 1 && entries[i]?.replace(/<[^>]*>/g, '') === crumb.name, `Breadcrumb name/position mismatch: ${rel}`);
+      if (i < crumbs.length - 1) check(entries[i]?.includes(`href="${basePath}${new URL(crumb.item).pathname.slice(basePath.length)}"`), `Breadcrumb URL mismatch: ${rel}`);
+    });
+    check(entries.at(-1)?.includes('aria-current="page"'), `Current breadcrumb missing: ${rel}`);
+  }
   const internalAttrs = [...html.matchAll(/\b(?:href|src)="([^"]+)"/g)].map(match => match[1]).filter(value => value.startsWith('/'));
   for (const href of internalAttrs) {
     check(href.startsWith(`${basePath}/`) || (basePath === '' && href.startsWith('/')), `Internal URL does not use base path (${basePath}): ${rel} -> ${href}`);
