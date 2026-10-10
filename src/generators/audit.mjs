@@ -16,8 +16,8 @@ const verified = disposal.filter(row => row.status === 'verified');
 const targetNames = new Set(['ベッド','マットレス','ソファ','タンス','本棚','テーブル','机','椅子','電子レンジ','炊飯器','掃除機','扇風機','自転車','布団','カーペット','スーツケース','衣装ケース','ベビーカー','チャイルドシート','ゴルフクラブ']);
 const targetRows = disposal.filter(row => targetNames.has(row.item));
 const byCity = Object.fromEntries(municipalities.map(city => [city.name, targetRows.filter(row => row.municipality === city.name)]));
-check(targetRows.length === 60, `Expected 60 target records; found ${targetRows.length}.`);
-check(new Set(targetRows.map(row => `${row.municipality}|${row.item}`)).size === 60, 'Target municipality/item pairs are duplicated or missing.');
+check(targetRows.length === 69, `Expected 69 target records; found ${targetRows.length}.`);
+check(new Set(targetRows.map(row => `${row.municipality}|${row.item}`)).size === 69, 'Target municipality/item pairs are duplicated or missing.');
 for (const row of verified) {
   for (const field of ['municipality','prefecture','item','category','disposal_method','fee','application_required','collection','dropoff','size_condition','notes','official_url','source_name','verified_at','status']) {
     check(String(row[field] ?? '').trim().length > 0, `Verified row missing ${field}: ${row.municipality} / ${row.item}`);
@@ -25,11 +25,11 @@ for (const row of verified) {
   check(row.status === 'verified', `Unexpected published status: ${row.municipality} / ${row.item}`);
   check(/^https:\/\//.test(row.official_url || ''), `Official URL is not HTTPS: ${row.municipality} / ${row.item}`);
   const host = new URL(row.official_url).hostname;
-  check(['city.kawasaki.jp','yokohama.lg.jp','city.osaka.lg.jp'].some(domain => host === domain || host.endsWith(`.${domain}`)), `Official URL is not a municipal source: ${row.municipality} / ${row.item} (${host})`);
+  check(['city.kawasaki.jp','yokohama.lg.jp','city.osaka.lg.jp','city.saitama.lg.jp','city.fukuoka.lg.jp','city.nagoya.jp'].some(domain => host === domain || host.endsWith(`.${domain}`)), `Official URL is not a municipal source: ${row.municipality} / ${row.item} (${host})`);
   check(Array.isArray(row.source_urls) && row.source_urls.length > 0, `Verified row has no evidence URLs: ${row.municipality} / ${row.item}`);
   check(Boolean(row.verified_at), `Verified row has no verification date: ${row.municipality} / ${row.item}`);
 }
-const expected = {'川崎市':[20,0], '横浜市':[18,2], '大阪市':[20,0]};
+const expected = {'川崎市':[20,0], '横浜市':[18,2], '大阪市':[20,0], 'さいたま市':[3,0], '福岡市':[3,0], '名古屋市':[3,0]};
 for (const [name,[v,d]] of Object.entries(expected)) {
   const rows = byCity[name] || [];
   check(rows.filter(row => row.status === 'verified').length === v, `${name} verified target count mismatch.`);
@@ -46,7 +46,7 @@ async function walk(dir) {
 }
 await walk(out);
 const htmlFiles = allFiles.filter(file => extname(file) === '.html');
-check(htmlFiles.length === verified.length + municipalities.length + 10, `Expected ${verified.length} detail + ${municipalities.length} municipality + home + 404 HTML files; found ${htmlFiles.length}.`);
+check(htmlFiles.length === verified.length + municipalities.length + municipalities.filter(c => c.dropoff_guide).length + 10, `Expected ${verified.length} detail + ${municipalities.length} municipality + home + 404 HTML files; found ${htmlFiles.length}.`);
 check(allFiles.some(file => file === resolve(out, '404.html')), '404.html is missing.');
 check(allFiles.some(file => file === resolve(out, 'robots.txt')), 'robots.txt is missing.');
 check(allFiles.some(file => file === resolve(out, '.nojekyll')), '.nojekyll is missing.');
@@ -95,10 +95,10 @@ for (const [title, pages] of titles) check(pages.length === 1, `Duplicate title 
 for (const [heading, pages] of headings) check(pages.length === 1, `Duplicate H1 '${heading}': ${pages.join(', ')}`);
 const sitemap = await readFile(resolve(out,'sitemap.xml'),'utf8');
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => match[1]);
-const expectedUrls = [canonical('/'), ...['bed','mattress','sofa','bicycle','futon'].map(slug => canonical(`/items/${slug}/`)), ...['about','advertising','privacy'].map(p => canonical(`/${p}/`)), ...municipalities.map(city => canonical(`/${city.slug}/`)), ...verified.map(row => { const city=municipalities.find(m=>m.name===row.municipality), item=items.find(i=>i.name===row.item); return canonical(`/${city.slug}/${encodeURIComponent(item?.slug || row.item)}/`); })].sort();
+const expectedUrls = [canonical('/'), ...municipalities.filter(c => c.dropoff_guide).map(c => canonical(`/${c.slug}/dropoff/`)), ...['bed','mattress','sofa','bicycle','futon'].map(slug => canonical(`/items/${slug}/`)), ...['about','advertising','privacy'].map(p => canonical(`/${p}/`)), ...municipalities.map(city => canonical(`/${city.slug}/`)), ...verified.map(row => { const city=municipalities.find(m=>m.name===row.municipality), item=items.find(i=>i.name===row.item); return canonical(`/${city.slug}/${encodeURIComponent(item?.slug || row.item)}/`); })].sort();
 check(sitemap.startsWith('<?xml version="1.0" encoding="UTF-8"?>') && sitemap.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">') && sitemap.endsWith('</urlset>'), 'Sitemap XML document structure is invalid.');
 check(sitemapUrls.length === (sitemap.match(/<url>/g)||[]).length, 'Some sitemap entries are missing a single <loc> URL.');
-check(sitemapUrls.length === 70, `Expected 70 sitemap URLs; found ${sitemapUrls.length}.`);
+check(sitemapUrls.length === 85, `Expected 85 sitemap URLs; found ${sitemapUrls.length}.`);
 check(new Set(sitemapUrls).size === sitemapUrls.length, 'Duplicate sitemap URLs found.');
 check(JSON.stringify([...sitemapUrls].sort()) === JSON.stringify(expectedUrls), 'Sitemap URLs do not match home, municipality, and verified pages.');
 check(sitemapUrls.every(url => url.startsWith(`${site.base_url.replace(/\/$/, '')}${basePath}/`)), 'Sitemap contains a URL outside the configured HTTPS base path.');
@@ -126,13 +126,22 @@ vm.runInNewContext(app,{window:{},document:{querySelectorAll:()=>[form]}});
 submit({preventDefault(){}});
 check((result.innerHTML.match(/class="result"/g)||[]).length===3,'Search should return one verified microwave result per city.');
 values['item-select'] = 'ソファ'; events['item-select:change'](); submit({preventDefault(){}});
-check(values['item-query'] === 'ソファ' && (result.innerHTML.match(/class="result"/g)||[]).length === 3, 'Picker selection should fill the input and search the selected item.');
+check(values['item-query'] === 'ソファ' && (result.innerHTML.match(/class="result"/g)||[]).length === 6, 'Picker selection should fill the input and search the selected item.');
 values['item-query'] = '電子'; events['item-query:input'](); submit({preventDefault(){}});
 check(values['item-select'] === '' && result.innerHTML.includes('電子レンジ'), 'Editing the selected item should clear the picker and allow partial text search.');
 values['item-query'] = '電子レンジ'; events['item-query:input']();
 check(values['item-select'] === '電子レンジ', 'Exact text should synchronize the picker.');
 values['item-query']='チャイルドシート'; values['municipality-query']='yokohama'; submit({preventDefault(){}});
 check(result.innerHTML.includes('公式情報を確認中'),'Draft-only Yokohama item should not appear in search results.');
+for (const city of municipalities.filter(c => c.dropoff_guide)) {
+  values['item-query'] = '布団'; values['municipality-query'] = city.slug; values['prefecture-query'] = city.prefecture;
+  submit({preventDefault(){}});
+  check((result.innerHTML.match(/class="result"/g)||[]).length === 1 && result.innerHTML.includes(city.name), `${city.name} futon search with prefecture filter failed.`);
+  const page = await readFile(resolve(out, `${city.slug}/dropoff/index.html`), 'utf8');
+  check(page.includes(city.dropoff_guide.fee) && page.includes('BreadcrumbList'), `${city.name} dropoff fee or breadcrumbs missing.`);
+}
+const nagoya = municipalities.find(c => c.slug === 'nagoya');
+check(nagoya.basic_rule.includes('45リットル') && nagoya.dropoff_guide.fee.includes('270円'), 'Nagoya October 2026 rules must use the current bag criterion and dropoff fee.');
 const css = await readFile(resolve(out,'styles.css'),'utf8');
 check(css.includes('@media(max-width:767px)') && css.includes('@media(max-width:480px)'), 'Responsive breakpoints for tablet and phone are missing.');
 check(await stat(resolve(out,'index.html')).then(() => true).catch(() => false), 'Homepage missing.');
@@ -141,5 +150,5 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log(`Audit passed: ${verified.length} verified / ${disposal.length-verified.length} draft records, ${municipalities.length} municipality pages, ${verified.length} details, home, 404, 70 sitemap URLs, SEO metadata, JSON-LD, internal links, search, and responsive CSS.`);
+  console.log(`Audit passed: ${verified.length} verified / ${disposal.length-verified.length} draft records, ${municipalities.length} municipality pages, ${verified.length} details, home, 404, ${sitemapUrls.length} sitemap URLs, SEO metadata, JSON-LD, internal links, search, and responsive CSS.`);
 }
