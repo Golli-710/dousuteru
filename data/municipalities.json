@@ -22,5 +22,73 @@
     "official_url": "https://www.city.osaka.lg.jp/kankyo/page/0000369355.html",
     "source_name": "大阪市 粗大ごみの収集について",
     "basic_rule": "家庭から出るごみで最大の辺・径が30cmを超えるもの、または棒状で1mを超えるものが粗大ごみの対象です。品目一覧で区分をご確認ください。"
+  },
+  {
+    "slug": "saitama",
+    "name": "さいたま市",
+    "prefecture": "埼玉県",
+    "official_url": "https://www.city.saitama.lg.jp/001/006/010/003/p072165.html",
+    "source_name": "さいたま市 粗大ごみ・特定適正処理困難物",
+    "basic_rule": "最大の一辺または直径が90cm以上2m未満の家庭ごみは粗大ごみ。スプリング入りマットレス・ソファーは特定適正処理困難物です。",
+    "dropoff_guide": {
+      "summary": "家庭ごみの直接搬入は完全予約制です。市内居住を確認できるものを持参し、ご自身で持ち込んでください。",
+      "fee": "2026年12月まで：10kg以下は無料。10kgを超える場合は最初の10kgから180円／10kg＋税。2027年1月からは240円／10kg＋税。特定適正処理困難物は品目別料金です。",
+      "steps": [
+        "オンラインまたはごみ持込みコールセンターで前日17時までに予約する。当日予約はできません。",
+        "受入施設・品目・持込時間を確認する。西部環境センターはもえるごみのみ。",
+        "市内居住確認書類を持参し、施設で計量・支払いを行う。"
+      ],
+      "notes": "スプリング入りマットレスと2人掛け以上のスプリング入りソファーは各1,650円、1人掛けのスプリング入りソファーは550円。収集料金とは異なります。",
+      "source_urls": [
+        "https://www.city.saitama.lg.jp/001/006/010/003/p005300_d/fil/r8_jp_gomimanual_tan.pdf",
+        "https://www.city.saitama.lg.jp/faq/001/001/005/p110648.html"
+      ],
+      "verified_at": "2026-10-09"
+    }
+  },
+  {
+    "slug": "fukuoka",
+    "name": "福岡市",
+    "prefecture": "福岡県",
+    "official_url": "https://www.city.fukuoka.lg.jp/kankyo/kateigomi/life/katei-bunbetsu/sodaigomi.html",
+    "source_name": "福岡市 粗大ごみの出し方",
+    "basic_rule": "指定袋に入れて口を結べない大きさのものや、重さで袋が破けるものは粗大ごみ。収集は事前申込みが必要です。",
+    "dropoff_guide": {
+      "summary": "市内で発生したごみを、本人が予約した処理施設へ持ち込めます。市外のごみや他人のごみは搬入できません。",
+      "fee": "10kgまでごとに140円。品目別の収集料金とは異なります。",
+      "steps": [
+        "受入基準を確認し、インターネットまたは電話で搬入希望時刻の30分前までに予約する。",
+        "スプリングの有無などを伝え、予約した受入施設を確認する。",
+        "搬入先で計量・支払い。レンタカー利用は事前の電話確認・審査が必要。"
+      ],
+      "notes": "ソファー・ベッド・マットレス類は1日2個（枚）まで。スプリング入りは資源化センターで受入れ。",
+      "source_urls": [
+        "https://www.city.fukuoka.lg.jp/kankyo/kanri/hp/jikohannyuu.html",
+        "https://www.city.fukuoka.lg.jp/kankyo/kanri/hp/documents/omonagomi_ukeire.pdf"
+      ],
+      "verified_at": "2026-10-09"
+    }
+  },
+  {
+    "slug": "nagoya",
+    "name": "名古屋市",
+    "prefecture": "愛知県",
+    "official_url": "https://www.city.nagoya.jp/kurashi/gomi/1012183/1035058/1012184/index.html",
+    "source_name": "名古屋市 粗大ごみの分け方・出し方",
+    "basic_rule": "2026年10月から、容量45リットルの指定袋に入らないものが粗大ごみの対象です。袋の口をしっかり結べない場合も対象。例外品は公式案内をご確認ください。",
+    "dropoff_guide": {
+      "summary": "処理施設へ直接行く前に、ごみが発生した区の環境事業所で受付が必要です。月〜金曜日は祝日も搬入可、土日・年末年始は搬入不可。",
+      "fee": "10kgまでごとに270円。処理施設で計量し、現金で支払います。",
+      "steps": [
+        "可燃ごみと不燃・粗大ごみを分けて積む。同時には運べません。",
+        "車に積んだ状態で、発生区の環境事業所へ受付時間内に行く。",
+        "当日の承認書を受け取り、指定された施設へ搬入・計量・支払いする。"
+      ],
+      "notes": "2027年1月頃から受付方法の変更予定があるため、搬入前に公式の最新手順を必ず確認してください。徒歩・自転車での搬入はできません。",
+      "source_urls": [
+        "https://www.city.nagoya.jp/kurashi/gomi/1012183/1033991.html"
+      ],
+      "verified_at": "2026-10-09"
+    }
   }
 ]
